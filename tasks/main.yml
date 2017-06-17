@@ -1,0 +1,65 @@
+---
+# tasks file for ansible-role-ansible-tower
+
+- name: Install Ansible
+  yum:
+    pkg: ansible
+    state: present
+  become: yes
+
+- name: Check if local archive exists
+  stat:
+    path: "{{ tower_archive_path }}"
+  register: file_archive_exists
+  when: tower_archive_path is defined
+
+- name: Jira Install - Copy Local Jira Archive
+  copy:
+    src: "{{ tower_archive_path }}"
+    dest: "/tmp"
+  when:
+    - tower_archive_path is defined
+    - file_archive_exists.stat.exists
+
+- name: Download Ansible Tower
+  get_url: 
+    url: "{{ tower_url }}"
+    dest: "/tmp/{{ tower_archive }}"
+
+- name: Extract Archive
+  unarchive:
+    src: "/tmp/{{ tower_archive }}"
+    dest: '/tmp'
+    copy: no
+
+- name: Remove archive file
+  file:
+    path: "/tmp/{{ tower_archive }}"
+    state: absent
+  when: not tower_archive_path is defined
+
+- name: Edit Setup Files
+  lineinfile:
+    dest: "/tmp/ansible-tower-setup-{{ tower_version }}/inventory"
+    line: "{{ item.line }}"
+    regexp: "{{ item.regexp }}"
+    create: yes
+    mode: '0644'
+  with_items:
+        - { regexp: "^admin_password=*",    line: "admin_password='{{ tower_admin_password }}'" }
+        - { regexp: "^pg_password=*",       line: "pg_password='{{ tower_pg_password }}'" }
+        - { regexp: "^rabbitmq_password=*", line: "rabbitmq_password='{{ tower_rabbitmq_password }}'" }
+        - { regexp: "^pg_host=*",           line: "pg_host='{{ tower_pg_host }}'" }
+        - { regexp: "^pg_port=*",           line: "pg_port='{{ tower_pg_port }}'" }
+        - { regexp: "^pg_database=*",       line: "pg_database='{{ tower_pg_database }}'" }
+        - { regexp: "^pg_username=*",       line: "pg_username='{{ tower_pg_username }}'" }
+
+- name: Run Tower Installation
+  shell: "/tmp/ansible-tower-setup-{{ tower_version }}/setup.sh"
+  become: true
+
+- name: Remove Tower Install Dir
+  file: 
+    path: "/tmp/ansible-tower-setup-{{ tower_version }}"
+    state: absent
+  
