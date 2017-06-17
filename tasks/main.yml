@@ -46,13 +46,13 @@
     create: yes
     mode: '0644'
   with_items:
-        - { regexp: "^admin_password=*",    line: "admin_password='{{ tower_admin_password }}'" }
-        - { regexp: "^pg_password=*",       line: "pg_password='{{ tower_pg_password }}'" }
-        - { regexp: "^rabbitmq_password=*", line: "rabbitmq_password='{{ tower_rabbitmq_password }}'" }
-        - { regexp: "^pg_host=*",           line: "pg_host='{{ tower_pg_host }}'" }
-        - { regexp: "^pg_port=*",           line: "pg_port='{{ tower_pg_port }}'" }
-        - { regexp: "^pg_database=*",       line: "pg_database='{{ tower_pg_database }}'" }
-        - { regexp: "^pg_username=*",       line: "pg_username='{{ tower_pg_username }}'" }
+    - { regexp: "^admin_password=*",    line: "admin_password='{{ tower_admin_password }}'" }
+    - { regexp: "^pg_password=*",       line: "pg_password='{{ tower_pg_password }}'" }
+    - { regexp: "^rabbitmq_password=*", line: "rabbitmq_password='{{ tower_rabbitmq_password }}'" }
+    - { regexp: "^pg_host=*",           line: "pg_host='{{ tower_pg_host }}'" }
+    - { regexp: "^pg_port=*",           line: "pg_port='{{ tower_pg_port }}'" }
+    - { regexp: "^pg_database=*",       line: "pg_database='{{ tower_pg_database }}'" }
+    - { regexp: "^pg_username=*",       line: "pg_username='{{ tower_pg_username }}'" }
 
 - name: Run Tower Installation
   shell: "/tmp/ansible-tower-setup-{{ tower_version }}/setup.sh"
